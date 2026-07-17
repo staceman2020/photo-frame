@@ -3,6 +3,7 @@ import tseslint from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
+import globals from 'globals';
 
 export default [
   { ignores: ['dist'] },
@@ -13,7 +14,7 @@ export default [
       parser: tsParser,
       ecmaVersion: 2022,
       sourceType: 'module',
-      globals: { window: 'readonly', document: 'readonly', navigator: 'readonly' },
+      globals: { ...globals.browser, ...globals.worker },
     },
     plugins: {
       '@typescript-eslint': tseslint,
@@ -24,6 +25,10 @@ export default [
       ...tseslint.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      // TypeScript itself already reports undefined identifiers, including
+      // ambient DOM/lib types (CryptoKey, BufferSource, ...) no-undef can't
+      // see — see https://typescript-eslint.io/linting/troubleshooting/#i-get-errors-from-the-no-undef-rule-about-global-variables-not-being-defined-even-though-there-are-no-typescript-errors
+      'no-undef': 'off',
     },
   },
 ];
