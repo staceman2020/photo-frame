@@ -1,0 +1,20 @@
+rules_version = '2';
+
+// Mirrors firestore.rules: single-owner access pinned to a hardcoded UID.
+// See firebase_setup.md step "Restrict access to your account".
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isOwner() {
+      return request.auth != null
+        && request.auth.uid == "REPLACE_WITH_OWNER_UID";
+    }
+
+    match /users/{uid}/{allPaths=**} {
+      allow read, write: if isOwner() && request.auth.uid == uid;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

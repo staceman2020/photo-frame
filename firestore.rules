@@ -1,0 +1,23 @@
+rules_version = '2';
+
+// Single-owner app: every path is scoped under users/{uid}, and access is
+// additionally pinned to one hardcoded UID so that signing in with any other
+// Google account (which Firebase Auth allows by default) still grants no
+// access. See firebase_setup.md step "Restrict access to your account" for
+// how to obtain and set OWNER_UID.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner() {
+      return request.auth != null
+        && request.auth.uid == "REPLACE_WITH_OWNER_UID";
+    }
+
+    match /users/{uid}/{document=**} {
+      allow read, write: if isOwner() && request.auth.uid == uid;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
