@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
+import { connectAuthEmulator, getAuth } from 'firebase/auth';
+import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
+import { connectStorageEmulator, getStorage } from 'firebase/storage';
 
 const requiredEnvVars = [
   'VITE_FIREBASE_API_KEY',
@@ -31,6 +31,15 @@ export const firebaseApp = initializeApp(firebaseConfig);
 export const auth = getAuth(firebaseApp);
 export const db = getFirestore(firebaseApp);
 export const storage = getStorage(firebaseApp);
+
+// Route the SDK at the local emulator suite (`npm run emulators`) instead of
+// live Firebase when VITE_USE_FIREBASE_EMULATORS=true. Ports match
+// firebase.json's `emulators` block. See firebase_setup.md.
+if (import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true') {
+  connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+  connectFirestoreEmulator(db, '127.0.0.1', 8080);
+  connectStorageEmulator(storage, '127.0.0.1', 9199);
+}
 
 // App Check (recommended hardening, see firebase_setup.md) is intentionally
 // not wired up yet — it requires a reCAPTCHA site key from the Firebase

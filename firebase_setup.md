@@ -178,10 +178,70 @@ ARCHITECTURE.md §7 and §9:
 
 - `.env.local` holds your real Firebase config (gitignored). `npm run dev`
   reads it automatically via Vite.
-- The app talks to your **live** Firestore/Storage/Auth by default — there
-  are no emulators wired up yet. If you want offline/cheap iteration later,
-  `firebase init emulators` adds that on top of this same project; not needed
-  for the walking skeleton.
+- By default the app talks to your **live** Firestore/Storage/Auth. To
+  develop against the local emulator suite instead (free, offline, safe to
+  wipe), see the next section.
+
+## 12. Running the emulator suite
+
+The Auth, Firestore, and Storage emulators are already configured in
+[firebase.json](firebase.json) and their binaries are downloaded. To use them:
+
+1. **Java is required** for the Firestore and Storage emulators (Auth and
+   Hosting don't need it). Check with `java -version`. If missing:
+
+   ```bash
+   brew install openjdk
+   ```
+
+   Homebrew installs it "keg-only" (not linked into your main PATH, since
+   macOS ships its own Java shim). Pick one:
+
+   - Add it to your shell's PATH (add to `~/.zshrc`, then open a new
+     terminal):
+     ```bash
+     echo 'export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"' >> ~/.zshrc
+     ```
+   - Or symlink it system-wide so the macOS `java` wrapper finds it (needs
+     sudo):
+     ```bash
+     sudo ln -sfn /opt/homebrew/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
+     ```
+
+2. Start the emulators:
+
+   ```bash
+   npm run emulators
+   ```
+
+   This runs `firebase emulators:start --only auth,firestore,storage` against
+   whatever project `.firebaserc` points at. Before you've done step 7 (linking
+   a real project), or any time you'd rather not touch live data at all, run
+   it against a fake **demo project** instead — `demo`-prefixed IDs are
+   treated specially by the SDKs as emulator-only, so nothing ever touches
+   real Firebase:
+
+   ```bash
+   firebase emulators:start --project demo-photo-frame --only auth,firestore,storage
+   ```
+
+3. Once running, the Emulator UI is at <http://127.0.0.1:4000> (Auth,
+   Firestore, and Storage data viewers/editors, all reset when the process
+   stops unless you pass `--export-on-exit`/`--import`).
+
+4. Point the app at the emulators: in `.env.local`, set
+   `VITE_USE_FIREBASE_EMULATORS=true` (see `.env.example`). If you're using a
+   `demo-*` project and haven't done step 3 yet, `VITE_FIREBASE_PROJECT_ID`
+   should match that demo ID and the other five `VITE_FIREBASE_*` values can
+   be any placeholder string — the emulators don't validate them. Restart
+   `npm run dev` after changing `.env.local`.
+
+Rules enforcement still applies in the emulator (it reads the same
+`firestore.rules` / `storage.rules`), so if you're testing against a
+`demo-*` project rather than your real one, the `REPLACE_WITH_OWNER_UID`
+placeholder will reject everyone — either swap in a real UID temporarily, or
+loosen the rules locally for that testing session (don't deploy the loosened
+version).
 
 ## Troubleshooting
 
