@@ -4,6 +4,7 @@ import {
   importAesKey,
   persistKeyBytes,
 } from '../services/cryptoService';
+import { blobCache } from '../services/blobCache';
 
 interface UnlockOptions {
   /** Set false when the key was already read from localStorage (no need to rewrite it). */
@@ -31,6 +32,7 @@ export const useKeyStore = create<KeyState>((set) => ({
   },
   lock: () => {
     clearStoredKeyBytes();
+    blobCache.clear();
     set({ status: 'locked', keyBytes: null, cryptoKey: null });
   },
 }));

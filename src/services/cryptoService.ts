@@ -1,5 +1,11 @@
 import { entropyToMnemonic, mnemonicToEntropy, validateMnemonic } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english';
+import {
+  decrypt as decryptBytes,
+  encrypt as encryptBytes,
+  importAesKey as importAesKeyPrimitive,
+  type EncryptedPayload,
+} from './aesGcm';
 
 const KEY_STORAGE_KEY = 'photo-frame:masterKey';
 
@@ -11,10 +17,7 @@ const KEY_STORAGE_KEY = 'photo-frame:masterKey';
  */
 export const KEY_CHECK_MARKER = 'photo-frame-key-check-v1';
 
-export interface EncryptedPayload {
-  ciphertext: Uint8Array;
-  iv: Uint8Array;
-}
+export type { EncryptedPayload } from './aesGcm';
 
 function bytesToHex(bytes: Uint8Array): string {
   return Array.from(bytes)
@@ -49,28 +52,15 @@ export function mnemonicToKeyBytes(mnemonic: string): Uint8Array {
   return mnemonicToEntropy(normalized, wordlist);
 }
 
-export function importAesKey(keyBytes: Uint8Array): Promise<CryptoKey> {
-  return crypto.subtle.importKey('raw', keyBytes as BufferSource, 'AES-GCM', true, [
-    'encrypt',
-    'decrypt',
-  ]);
-}
+export const importAesKey = importAesKeyPrimitive;
 
 export async function encrypt(key: CryptoKey, plaintext: string): Promise<EncryptedPayload> {
-  const iv = new Uint8Array(12);
-  crypto.getRandomValues(iv);
-  const data = new TextEncoder().encode(plaintext);
-  const ciphertextBuffer = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, data);
-  return { ciphertext: new Uint8Array(ciphertextBuffer), iv };
+  return encryptBytes(key, new TextEncoder().encode(plaintext));
 }
 
 /** Throws (GCM auth tag mismatch) if `key` is wrong or the payload was tampered with. */
 export async function decrypt(key: CryptoKey, payload: EncryptedPayload): Promise<string> {
-  const plaintextBuffer = await crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv: payload.iv as BufferSource },
-    key,
-    payload.ciphertext as BufferSource,
-  );
+  const plaintextBuffer = await decryptBytes(key, payload);
   return new TextDecoder().decode(plaintextBuffer);
 }
 
