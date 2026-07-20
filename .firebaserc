@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "REPLACE_WITH_YOUR_PROJECT_ID"
-  }
+    "default": "photo-frame-37f42"
+  },
+  "targets": {},
+  "etags": {}
 }
