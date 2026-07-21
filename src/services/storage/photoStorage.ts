@@ -1,4 +1,4 @@
-import { getBytes, ref, uploadBytes } from 'firebase/storage';
+import { deleteObject, getBytes, ref, uploadBytes } from 'firebase/storage';
 import { storage } from '../firebase';
 
 export type PhotoVariant = 'original' | 'display' | 'thumb';
@@ -25,4 +25,12 @@ export function downloadEncryptedVariant(
   variant: PhotoVariant,
 ): Promise<ArrayBuffer> {
   return getBytes(variantRef(uid, photoId, variant));
+}
+
+export function deleteEncryptedVariant(
+  uid: string,
+  photoId: string,
+  variant: PhotoVariant,
+): Promise<void> {
+  return deleteObject(variantRef(uid, photoId, variant));
 }

@@ -4,6 +4,7 @@ import type { UploadProps } from 'antd';
 import { InboxOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useKeyStore } from '../../stores/useKeyStore';
+import { useModeStore } from '../../stores/useModeStore';
 import { ImageWorkerPool } from '../../workers/workerPool';
 import { runUpload, type UploadStage } from '../../services/uploadService';
 import { getDecryptedBlobUrl } from '../../services/photoBlobService';
@@ -42,7 +43,10 @@ export function UploadPage() {
   const uid = useAuthStore((s) => s.user?.uid);
   const cryptoKey = useKeyStore((s) => s.cryptoKey);
   const [items, setItems] = useState<UploadItem[]>([]);
-  const [secure, setSecure] = useState(false);
+  // Default to the mode active when this page mounted (F3: "secure when
+  // uploading in secure mode") — a starting point the user can still
+  // override per batch, not a live binding to the mode store.
+  const [secure, setSecure] = useState(() => useModeStore.getState().mode === 'secure');
   const poolRef = useRef<ImageWorkerPool | null>(null);
 
   useEffect(

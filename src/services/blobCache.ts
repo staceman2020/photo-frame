@@ -49,6 +49,17 @@ class BlobCache {
     }
   }
 
+  /** Evicts every cached variant for one photo (e.g. after it's deleted). */
+  deleteMatching(photoId: string): void {
+    const prefix = `${photoId}:`;
+    for (const key of Array.from(this.entries.keys())) {
+      if (!key.startsWith(prefix)) continue;
+      const entry = this.entries.get(key);
+      if (entry) URL.revokeObjectURL(entry.url);
+      this.entries.delete(key);
+    }
+  }
+
   clear(): void {
     for (const entry of this.entries.values()) URL.revokeObjectURL(entry.url);
     this.entries.clear();

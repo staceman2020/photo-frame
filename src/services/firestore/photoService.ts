@@ -1,4 +1,4 @@
-import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { deleteDoc, doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { Orientation } from '../imageMeta';
 
@@ -43,4 +43,12 @@ export async function createPhoto(uid: string, photoId: string, data: NewPhotoDa
     createdAt: serverTimestamp(),
     uploadedAt: serverTimestamp(),
   });
+}
+
+export async function deletePhotoDoc(uid: string, photoId: string): Promise<void> {
+  await deleteDoc(photoRef(uid, photoId));
+}
+
+export async function updatePhotoSecure(uid: string, photoId: string, secure: boolean): Promise<void> {
+  await updateDoc(photoRef(uid, photoId), { secure });
 }

@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",
-    "emulators": "firebase emulators:start --only auth,firestore,storage"
+    "emulators": "firebase emulators:start --only auth,firestore,storage",
+    "kill-emulators": "pids=$(lsof -ti tcp:4000,4400,4500,5000,8080,9099,9150,9199); [ -n \"$pids\" ] && kill $pids || true"
   },
   "dependencies": {
     "@ant-design/icons": "^5.5.1",
@@ -19,6 +20,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0",
+    "react-virtuoso": "^4.10.4",
     "zustand": "^5.0.1"
   },
   "devDependencies": {

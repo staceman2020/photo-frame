@@ -6,11 +6,13 @@ export interface SettingsDoc {
   securePinHash?: string;
   securePinSalt?: string;
   autoLockMinutes: number;
+  secureModeInactivityMinutes: number;
   slideshowDefaults?: { minSeconds: number; maxSeconds: number };
 }
 
 const DEFAULT_SETTINGS: SettingsDoc = {
   autoLockMinutes: 15,
+  secureModeInactivityMinutes: 5,
 };
 
 function keyCheckRef(uid: string) {

@@ -5,6 +5,8 @@ import {
   persistKeyBytes,
 } from '../services/cryptoService';
 import { blobCache } from '../services/blobCache';
+import { useModeStore } from './useModeStore';
+import { usePhotoStore } from './usePhotoStore';
 
 interface UnlockOptions {
   /** Set false when the key was already read from localStorage (no need to rewrite it). */
@@ -33,6 +35,8 @@ export const useKeyStore = create<KeyState>((set) => ({
   lock: () => {
     clearStoredKeyBytes();
     blobCache.clear();
+    useModeStore.getState().setMode('open');
+    usePhotoStore.getState().reset();
     set({ status: 'locked', keyBytes: null, cryptoKey: null });
   },
 }));
